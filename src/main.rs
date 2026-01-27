@@ -130,8 +130,8 @@ impl State {
 
         // Enterキーを含める場合はテキストと一緒に送信
         if msg.send_enter {
-            let text_with_enter = format!("{}\n", msg.text);
-            write_chars_to_pane_id(&text_with_enter, pane_id);
+            // テキスト + 改行を送信
+            write_chars_to_pane_id(&format!("{}\n", msg.text), pane_id);
         } else {
             write_chars_to_pane_id(&msg.text, pane_id);
         }
