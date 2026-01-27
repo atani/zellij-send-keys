@@ -83,7 +83,7 @@ impl ZellijPlugin for State {
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
-        println!("=== Zellij MultiAgent Plugin ===");
+        println!("=== zellij-send-keys ===");
         println!();
 
         if let Some(msg) = &self.last_message {
@@ -100,7 +100,7 @@ impl ZellijPlugin for State {
 
         println!();
         println!("Usage:");
-        println!("  zellij action pipe --plugin file:zellij-multiagent.wasm \\");
+        println!("  zellij action pipe --plugin file:zellij-send-keys.wasm \\");
         println!("    --name send_keys -- '{{\"pane_id\": 1, \"text\": \"hello\", \"send_enter\": true}}'");
     }
 }
