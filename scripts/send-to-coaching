@@ -1,7 +1,7 @@
 #!/bin/bash
 # send-to-coaching - Send message to coaching staff member
 # Usage: send-to-coaching <member> "message" [session]
-# Members: coach, assistant, tactician, tester, worker-a, worker-b
+# Members: coach, reviewer, tactician, qa-lead, coordinator, tester, worker-a, worker-b
 
 set -e
 
@@ -17,15 +17,17 @@ fi
 
 # Map member to pane ID
 case "$MEMBER" in
-    coach)      PANE_ID=0 ;;
-    assistant)  PANE_ID=1 ;;
-    tactician)  PANE_ID=2 ;;
-    tester)     PANE_ID=3 ;;
-    worker-a)   PANE_ID=4 ;;
-    worker-b)   PANE_ID=5 ;;
+    coach)       PANE_ID=0 ;;
+    reviewer)    PANE_ID=1 ;;
+    tactician)   PANE_ID=2 ;;
+    qa-lead)     PANE_ID=3 ;;
+    coordinator) PANE_ID=4 ;;
+    tester)      PANE_ID=5 ;;
+    worker-a)    PANE_ID=6 ;;
+    worker-b)    PANE_ID=7 ;;
     *)
         echo "Unknown member: $MEMBER"
-        echo "Valid members: coach, assistant, tactician, tester, worker-a, worker-b"
+        echo "Valid members: coach, reviewer, tactician, qa-lead, coordinator, tester, worker-a, worker-b"
         exit 1
         ;;
 esac

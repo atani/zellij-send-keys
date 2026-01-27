@@ -1,5 +1,5 @@
-// Coaching Staff Layout (6-person team)
-// Coach → Assistant → Tactician/Tester/Workers
+// Coaching Staff Layout (8-person team)
+// Coach → Reviewer/Tactician/QA Lead/Coordinator/Tester/Workers
 
 layout {
     default_tab_template {
@@ -12,26 +12,42 @@ layout {
         }
     }
 
-    // Coach: 総監督・統合・最終判断
+    // Coach: チーム統括のスペシャリスト。目標設定、意思決定、リソース配分の最終責任者
     tab name="Coach" focus=true {
         pane name="coach" {
             command "claude"
         }
     }
 
-    // Assistant: 調整・レビュー・進捗管理
-    tab name="Assistant" {
-        pane name="assistant" {
+    // Reviewer: コードレビューのエキスパート。可読性、保守性、設計原則の番人
+    tab name="Reviewer" {
+        pane name="reviewer" {
             command "claude"
         }
     }
 
-    // Staff: Tactician & Tester
-    tab name="Staff" {
+    // Strategy: 設計と品質戦略
+    tab name="Strategy" {
         pane split_direction="vertical" {
+            // Tactician: ソフトウェアアーキテクトの達人。設計パターン、技術選定、システム構造の専門家
             pane name="tactician" {
                 command "claude"
             }
+            // QA Lead: 品質保証のプロフェッショナル。テスト戦略、品質基準、リリース判定の責任者
+            pane name="qa-lead" {
+                command "claude"
+            }
+        }
+    }
+
+    // Operations: 調整とテスト実行
+    tab name="Operations" {
+        pane split_direction="vertical" {
+            // Coordinator: プロジェクト調整の専門家。依存関係管理、ブロッカー解消、チーム間連携のプロ
+            pane name="coordinator" {
+                command "claude"
+            }
+            // Tester: テスト実装のスペシャリスト。E2E、ユニットテスト、エッジケース発見の達人
             pane name="tester" {
                 command "claude"
             }
@@ -41,9 +57,11 @@ layout {
     // Workers: 実装担当
     tab name="Workers" {
         pane split_direction="vertical" {
+            // Worker A: 実装のエキスパート。高品質なコードを高速に書くプロフェッショナル
             pane name="worker-a" {
                 command "claude"
             }
+            // Worker B: 実装のエキスパート。並列作業で生産性を最大化するプロフェッショナル
             pane name="worker-b" {
                 command "claude"
             }
