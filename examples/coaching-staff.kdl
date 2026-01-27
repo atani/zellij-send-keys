@@ -1,0 +1,47 @@
+// Coaching Staff Layout (6-person team)
+// Coach → Assistant → Tactician/Tester/Workers
+
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+        children
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+
+    // Coach: 総監督・統合・最終判断
+    tab name="Coach" focus=true {
+        pane name="coach"
+    }
+
+    // Assistant: 調整・レビュー・進捗管理
+    tab name="Assistant" {
+        pane name="assistant"
+    }
+
+    // Staff: Tactician & Tester
+    tab name="Staff" {
+        pane split_direction="vertical" {
+            pane name="tactician"  // 設計・戦術
+            pane name="tester"     // テスト・QA
+        }
+    }
+
+    // Workers: 実装担当
+    tab name="Workers" {
+        pane split_direction="vertical" {
+            pane name="worker-a"
+            pane name="worker-b"
+        }
+    }
+
+    // VAR: モニタリング・プラグイン
+    tab name="VAR" {
+        pane {
+            plugin location="file:~/.config/zellij/plugins/zellij-send-keys.wasm"
+        }
+    }
+}

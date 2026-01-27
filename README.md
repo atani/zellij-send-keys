@@ -118,6 +118,47 @@ zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
 
 This plugin enables building a hierarchical AI agent system in zellij, similar to what's possible with tmux.
 
+### Example Layout (Coaching Staff - Recommended)
+
+A practical 6-person team for real development work:
+
+```
+┌─────────────────────────────────────┐
+│ Coach (総監督・統合・最終判断)       │
+├─────────────────────────────────────┤
+│ Assistant (調整・レビュー・進捗管理) │
+├──────────────────┬──────────────────┤
+│ Tactician        │ Tester           │
+│ (設計・戦術)      │ (テスト・QA)     │
+├──────────────────┼──────────────────┤
+│ Worker A         │ Worker B         │
+│ (実装)           │ (実装)           │
+└──────────────────┴──────────────────┘
+```
+
+```bash
+# 1. Start the layout
+zellij -l examples/coaching-staff.kdl
+
+# 2. Set up environment
+source scripts/setup-coaching-staff.sh
+
+# 3. Send commands
+send-to-coach "PRをレビューして"
+send-to-tactician "APIの設計を考えて"
+send-to-tester "テストを書いて"
+send-to-worker-a "認証機能を実装して"
+```
+
+| Pane ID | Role | 役割 |
+|---------|------|------|
+| 0 | Coach | 総監督・最終判断 |
+| 1 | Assistant | 調整・レビュー |
+| 2 | Tactician | 設計・アーキテクチャ |
+| 3 | Tester | テスト・QA |
+| 4 | Worker A | 実装 |
+| 5 | Worker B | 実装 |
+
 ### Example Layout (Soccer Team Structure)
 
 ```
