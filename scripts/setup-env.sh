@@ -22,14 +22,14 @@ export ZELLIJ_PLUGIN="file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm"
 
 # Helper functions
 send-to-coach() {
-    zellij -s "$ZELLIJ_SESSION" action pipe \
+    ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
         --plugin "$ZELLIJ_PLUGIN" \
         --name send_keys \
         -- "{\"pane_id\": 0, \"text\": \"$1\", \"send_enter\": true}"
 }
 
 send-to-captain() {
-    zellij -s "$ZELLIJ_SESSION" action pipe \
+    ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
         --plugin "$ZELLIJ_PLUGIN" \
         --name send_keys \
         -- "{\"pane_id\": 1, \"text\": \"$1\", \"send_enter\": true}"
@@ -38,7 +38,7 @@ send-to-captain() {
 send-to-pane() {
     local pane_id="$1"
     local text="$2"
-    zellij -s "$ZELLIJ_SESSION" action pipe \
+    ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
         --plugin "$ZELLIJ_PLUGIN" \
         --name send_keys \
         -- "{\"pane_id\": ${pane_id}, \"text\": \"${text}\", \"send_enter\": true}"

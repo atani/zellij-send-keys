@@ -32,7 +32,7 @@ EOF
 echo "Task written to: $TASK_FILE"
 
 # Send task to the agent via plugin
-zellij -s "$SESSION" action pipe \
+ZELLIJ_SESSION_NAME="$SESSION" zellij action pipe \
   --plugin "$PLUGIN" \
   --name send_keys \
   -- "{\"pane_id\": ${PANE_ID}, \"text\": \"${TASK}\", \"send_enter\": true}"

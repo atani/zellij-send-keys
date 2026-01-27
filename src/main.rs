@@ -127,12 +127,13 @@ impl State {
 
         // 指定ペインにテキストを送信
         let pane_id = PaneId::Terminal(msg.pane_id);
-        write_chars_to_pane_id(&msg.text, pane_id);
 
-        // Enterキーを送信
+        // Enterキーを含める場合はテキストと一緒に送信
         if msg.send_enter {
-            // Enter = '\r' (0x0D)
-            write_to_pane_id(vec![0x0D], pane_id);
+            let text_with_enter = format!("{}\n", msg.text);
+            write_chars_to_pane_id(&text_with_enter, pane_id);
+        } else {
+            write_chars_to_pane_id(&msg.text, pane_id);
         }
 
         eprintln!(

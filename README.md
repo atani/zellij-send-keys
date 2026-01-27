@@ -53,17 +53,19 @@ A permission dialog will appear. Click **Grant** to allow the plugin to:
 
 ```bash
 # Send "echo hello" to pane 0 and press Enter
-zellij -s <session_name> action pipe \
+ZELLIJ_SESSION_NAME=<session_name> zellij action pipe \
   --plugin file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
   -- '{"pane_id": 0, "text": "echo hello", "send_enter": true}'
 
 # Send text without Enter
-zellij -s <session_name> action pipe \
+ZELLIJ_SESSION_NAME=<session_name> zellij action pipe \
   --plugin file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
   -- '{"pane_id": 0, "text": "partial text"}'
 ```
+
+> **Note**: Use `ZELLIJ_SESSION_NAME` environment variable instead of `-s` flag for session targeting.
 
 ### Using Helper Scripts
 
