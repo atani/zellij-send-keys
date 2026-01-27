@@ -4,14 +4,14 @@
 # Usage: source ./setup-coaching-staff.sh [session_name]
 #
 # Pane IDs (coaching-staff.kdl):
-#   0: coach       - チーム統括のスペシャリスト
-#   1: reviewer    - コードレビューのエキスパート
-#   2: tactician   - ソフトウェアアーキテクトの達人
-#   3: qa-lead     - 品質保証のプロフェッショナル
-#   4: coordinator - プロジェクト調整の専門家
-#   5: tester      - テスト実装のスペシャリスト
-#   6: worker-a    - 実装のエキスパート
-#   7: worker-b    - 実装のエキスパート
+#   0: coach       - Lead and final decision maker
+#   1: reviewer    - Code review and design guardrails
+#   2: tactician   - Architecture and technical strategy
+#   3: qa-lead     - Quality strategy and release criteria
+#   4: coordinator - Project coordination and blockers
+#   5: tester      - Testing execution and coverage
+#   6: worker-a    - Implementation
+#   7: worker-b    - Implementation
 
 # Auto-detect session if not provided
 if [ -n "$1" ]; then
@@ -31,7 +31,8 @@ export ZELLIJ_PLUGIN="file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm"
 # Helper function for sending to any pane (using jq for safe JSON encoding)
 _send_to_pane() {
     local pane_id="$1"
-    local text="$2"
+    local text
+    text=$(echo "$2" | tr '\n' ' ')  # Replace newlines with spaces
     local json_payload
     json_payload=$(jq -cn --argjson pane_id "$pane_id" --arg text "$text" \
         '{pane_id: $pane_id, text: $text, send_enter: true}')

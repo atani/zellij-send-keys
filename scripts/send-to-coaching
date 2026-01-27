@@ -6,12 +6,12 @@
 set -e
 
 MEMBER="$1"
-MESSAGE="$2"
+MESSAGE=$(echo "$2" | tr '\n' ' ')  # Replace newlines with spaces
 SESSION="$3"
 
 if [ -z "$MEMBER" ] || [ -z "$MESSAGE" ]; then
     echo "Usage: send-to-coaching <member> \"message\" [session]"
-    echo "Members: coach, assistant, tactician, tester, worker-a, worker-b"
+    echo "Members: coach, reviewer, tactician, qa-lead, coordinator, tester, worker-a, worker-b"
     exit 1
 fi
 

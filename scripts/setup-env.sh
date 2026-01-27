@@ -12,7 +12,7 @@ else
     ZELLIJ_SESSION=$(zellij list-sessions 2>/dev/null | grep -v EXITED | head -1 | awk '{print $1}')
     if [ -z "$ZELLIJ_SESSION" ]; then
         echo "No active zellij session found. Start one first:"
-        echo "  zellij -l soccer-team.kdl"
+        echo "  zellij -l examples/coaching-staff.kdl"
         return 1
     fi
     export ZELLIJ_SESSION
@@ -28,7 +28,7 @@ send-to-coach() {
         -- "{\"pane_id\": 0, \"text\": \"$1\", \"send_enter\": true}"
 }
 
-send-to-captain() {
+send-to-reviewer() {
     ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
         --plugin "$ZELLIJ_PLUGIN" \
         --name send_keys \
@@ -47,6 +47,6 @@ send-to-pane() {
 echo "Environment set up for session: $ZELLIJ_SESSION"
 echo ""
 echo "Available commands:"
-echo "  send-to-coach \"your message\"    - Send to Coach (pane 0)"
-echo "  send-to-captain \"your message\"  - Send to Captain (pane 1)"
-echo "  send-to-pane <id> \"message\"     - Send to specific pane"
+echo "  send-to-coach \"your message\"     - Send to Coach (pane 0)"
+echo "  send-to-reviewer \"your message\"  - Send to Reviewer (pane 1)"
+echo "  send-to-pane <id> \"message\"      - Send to specific pane"

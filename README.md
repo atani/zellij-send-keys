@@ -73,15 +73,17 @@ Source the setup script for convenient commands:
 
 ```bash
 # Set up environment (auto-detects active session)
-source scripts/setup-env.sh
+source scripts/setup-coaching-staff.sh
 
 # Or specify session name
-source scripts/setup-env.sh my-session
+source scripts/setup-coaching-staff.sh my-session
 
 # Now use simple commands
 send-to-coach "Analyze the codebase"
-send-to-captain "Run the tests"
-send-to-pane 5 "echo hello"
+send-to-reviewer "Review the diff"
+send-to-tactician "Draft an API plan"
+send-to-tester "Run the tests"
+send-to-pane 6 "echo hello"
 ```
 
 ### Comparison with tmux
@@ -120,20 +122,16 @@ This plugin enables building a hierarchical AI agent system in zellij, similar t
 
 ### Example Layout (Coaching Staff - Recommended)
 
-A practical 6-person team for real development work:
+An 8-person team organized into tabs:
 
 ```
-┌─────────────────────────────────────┐
-│ Coach (Lead, integration, final call) │
-├─────────────────────────────────────┤
-│ Assistant (coordination, review, progress) │
-├──────────────────┬──────────────────┤
-│ Tactician        │ Tester           │
-│ (design/strategy)│ (testing/QA)     │
-├──────────────────┼──────────────────┤
-│ Worker A         │ Worker B         │
-│ (implementation) │ (implementation) │
-└──────────────────┴──────────────────┘
+Tabs:
+- Coach
+- Reviewer
+- Strategy (Tactician | QA Lead)
+- Operations (Coordinator | Tester)
+- Workers (Worker A | Worker B)
+- VAR (plugin)
 ```
 
 ```bash
@@ -145,7 +143,9 @@ source scripts/setup-coaching-staff.sh
 
 # 3. Send commands
 send-to-coach "Review the PR"
+send-to-reviewer "Scan for risky changes"
 send-to-tactician "Design the API"
+send-to-qa-lead "Define test strategy"
 send-to-tester "Write tests"
 send-to-worker-a "Implement authentication"
 ```
@@ -153,11 +153,13 @@ send-to-worker-a "Implement authentication"
 | Pane ID | Role | Responsibility |
 |---------|------|----------------|
 | 0 | Coach | Lead, final decision |
-| 1 | Assistant | Coordination, review |
+| 1 | Reviewer | Code review, design guardrails |
 | 2 | Tactician | Architecture, design |
-| 3 | Tester | Testing, QA |
-| 4 | Worker A | Implementation |
-| 5 | Worker B | Implementation |
+| 3 | QA Lead | Quality strategy, release criteria |
+| 4 | Coordinator | Project coordination, blockers |
+| 5 | Tester | Testing, QA execution |
+| 6 | Worker A | Implementation |
+| 7 | Worker B | Implementation |
 
 ### Quick Start (Coaching Staff)
 
@@ -166,11 +168,12 @@ send-to-worker-a "Implement authentication"
 zellij -l examples/coaching-staff.kdl
 
 # 2. In another terminal, set up the environment
-source scripts/setup-env.sh
+source scripts/setup-coaching-staff.sh
 
 # 3. Send commands to agents
 send-to-coach "Summarize the codebase"
 send-to-tactician "Draft an API plan"
+send-to-worker-a "Start the implementation"
 ```
 
 ## License
