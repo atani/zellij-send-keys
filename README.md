@@ -67,23 +67,23 @@ ZELLIJ_SESSION_NAME=<session_name> zellij action pipe \
 
 > **Note**: Use `ZELLIJ_SESSION_NAME` environment variable instead of `-s` flag for session targeting.
 
-### Using Helper Scripts
+### Using Helper Script
 
-Source the setup script for convenient commands:
+Source the setup script for a convenient `send-to-pane` command:
 
 ```bash
 # Set up environment (auto-detects active session)
-source scripts/setup-coaching-staff.sh
+source scripts/setup-env.sh
 
 # Or specify session name
-source scripts/setup-coaching-staff.sh my-session
+source scripts/setup-env.sh my-session
 
-# Now use simple commands
-send-to-coach "Analyze the codebase"
-send-to-reviewer "Review the diff"
-send-to-tactician "Draft an API plan"
-send-to-tester "Run the tests"
-send-to-pane 6 "echo hello"
+# Send text to pane
+send-to-pane 0 "echo hello"
+send-to-pane 1 "npm run build"
+
+# Send without pressing Enter
+send-to-pane 0 "partial text" false
 ```
 
 ### Comparison with tmux
@@ -114,68 +114,6 @@ Display a list of available panes with their IDs. Launch the plugin to see the p
 
 ```bash
 zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
-```
-
-## Use Case: Multi-Agent AI System
-
-This plugin enables building a hierarchical AI agent system in zellij, similar to what's possible with tmux.
-
-### Example Layout (Coaching Staff - Recommended)
-
-An 8-person team of specialists, organized into tabs:
-
-```
-Tabs:
-- Coach
-- Reviewer
-- Strategy (Tactician | QA Lead)
-- Operations (Coordinator | Tester)
-- Workers (Worker A | Worker B)
-- VAR (plugin)
-```
-
-```bash
-# 1. Start the layout
-zellij -l examples/coaching-staff.kdl
-
-# 2. Set up environment
-source scripts/setup-coaching-staff.sh
-
-# 3. Send commands
-send-to-coach "Review the PR"
-send-to-reviewer "Scan for risky changes"
-send-to-tactician "Design the API"
-send-to-qa-lead "Define test strategy"
-send-to-tester "Write tests"
-send-to-worker-a "Implement authentication"
-```
-
-| Pane ID | Role | Responsibility |
-|---------|------|----------------|
-| 0 | Coach | Lead specialist, final decision |
-| 1 | Reviewer | Code review specialist, design guardrails |
-| 2 | Tactician | Architecture specialist, design strategy |
-| 3 | QA Lead | Quality specialist, release criteria |
-| 4 | Coordinator | Coordination specialist, blockers |
-| 5 | Tester | Testing specialist, QA execution |
-| 6 | Worker A | Implementation specialist |
-| 7 | Worker B | Implementation specialist |
-
-Balance rationale: one lead specialist, two implementation specialists, and dedicated specialists for review, architecture, quality, coordination, and testing. This keeps decision flow clear while preserving parallel execution and quality control.
-
-### Quick Start (Coaching Staff)
-
-```bash
-# 1. Start the layout
-zellij -l examples/coaching-staff.kdl
-
-# 2. In another terminal, set up the environment
-source scripts/setup-coaching-staff.sh
-
-# 3. Send commands to agents
-send-to-coach "Summarize the codebase"
-send-to-tactician "Draft an API plan"
-send-to-worker-a "Start the implementation"
 ```
 
 ## License

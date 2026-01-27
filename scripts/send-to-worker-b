@@ -1,2 +1,0 @@
-#\!/bin/bash
-exec /Users/a.taniwaki/src/github.com/atani/zellij-send-keys/scripts/send-to-coaching worker-b "$1" "$2"
