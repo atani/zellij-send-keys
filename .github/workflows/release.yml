@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip1
+
+      - name: Build WASM
+        run: cargo build --target wasm32-wasip1 --release
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/wasm32-wasip1/release/zellij-send-keys.wasm
+          generate_release_notes: true
