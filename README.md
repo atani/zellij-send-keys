@@ -32,29 +32,61 @@ cargo build --target wasm32-wasip1 --release
 cp target/wasm32-wasip1/release/zellij-send-keys.wasm ~/.config/zellij/plugins/
 ```
 
+## First Time Setup: Grant Permissions
+
+The plugin requires permissions to write to pane STDIN. On first use, you need to grant permissions:
+
+```bash
+# Inside a zellij session, run:
+zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
+```
+
+A permission dialog will appear. Click **Grant** to allow the plugin to:
+- Write to pane STDIN
+- Read application state (for listing panes)
+
+> **Note**: Use `$HOME` instead of `~` in plugin paths. The tilde is not expanded in all contexts.
+
 ## Usage
 
 ### Send text to a pane
 
 ```bash
-# Send "echo hello" to pane 1 and press Enter
-zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
+# Send "echo hello" to pane 0 and press Enter
+zellij -s <session_name> action pipe \
+  --plugin file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
-  -- '{"pane_id": 1, "text": "echo hello", "send_enter": true}'
+  -- '{"pane_id": 0, "text": "echo hello", "send_enter": true}'
 
 # Send text without Enter
-zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
+zellij -s <session_name> action pipe \
+  --plugin file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
-  -- '{"pane_id": 1, "text": "partial text"}'
+  -- '{"pane_id": 0, "text": "partial text"}'
+```
+
+### Using Helper Scripts
+
+Source the setup script for convenient commands:
+
+```bash
+# Set up environment (auto-detects active session)
+source scripts/setup-env.sh
+
+# Or specify session name
+source scripts/setup-env.sh my-session
+
+# Now use simple commands
+send-to-coach "Analyze the codebase"
+send-to-captain "Run the tests"
+send-to-pane 5 "echo hello"
 ```
 
 ### Comparison with tmux
 
 | tmux | zellij-send-keys |
 |------|------------------|
-| `tmux send-keys -t 1 "echo hello" Enter` | `zellij action pipe --plugin file:...wasm --name send_keys -- '{"pane_id":1,"text":"echo hello","send_enter":true}'` |
+| `tmux send-keys -t 0 "echo hello" Enter` | `send-to-pane 0 "echo hello"` |
 
 ## API
 
@@ -69,17 +101,15 @@ Send text to the STDIN of a specific pane.
 
 **Example:**
 ```json
-{"pane_id": 1, "text": "npm run build", "send_enter": true}
+{"pane_id": 0, "text": "npm run build", "send_enter": true}
 ```
 
 ### list_panes
 
-Display a list of available panes with their IDs.
+Display a list of available panes with their IDs. Launch the plugin to see the pane list:
 
 ```bash
-zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
-  --name list_panes
+zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
 ```
 
 ## Use Case: Multi-Agent AI System
@@ -105,21 +135,30 @@ This plugin enables building a hierarchical AI agent system in zellij, similar t
 
 See `examples/soccer-team.kdl` for a ready-to-use layout.
 
-### Start the layout
+### Quick Start
 
 ```bash
-zellij -l soccer-team.kdl
+# 1. Start the layout
+zellij -l examples/soccer-team.kdl
+
+# 2. In another terminal, set up the environment
+source scripts/setup-env.sh
+
+# 3. Send commands to agents
+send-to-coach "Analyze the opponent's formation"
+send-to-captain "Tell the midfielders to press higher"
 ```
 
-### Send commands between agents
+### Pane IDs in Soccer Team Layout
 
-```bash
-# Coach sends tactical instruction to Captain
-zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
-  --name send_keys \
-  -- '{"pane_id": 2, "text": "/task Press high and win the ball", "send_enter": true}'
-```
+| Pane ID | Role |
+|---------|------|
+| 0 | Coach |
+| 1 | Captain |
+| 2-4 | Forwards (FW) |
+| 5-8 | Midfielders (MF) |
+| 9-12 | Defenders (DF) |
+| 13 | Goalkeeper (GK) |
 
 ## License
 
