@@ -86,36 +86,39 @@ zellij action pipe \
 
 This plugin enables building a hierarchical AI agent system in zellij, similar to what's possible with tmux.
 
-### Example Layout (Corporate Structure)
+### Example Layout (Soccer Team Structure)
 
 ```
 ┌─────────────────────────────────────────────┐
-│ [CEO]        │ Strategic planning           │
+│ [Coach]      │ Tactical planning            │
 ├──────────────┼──────────────────────────────┤
-│ [Manager]    │ Task breakdown & delegation  │
+│ [Captain]    │ Relay instructions to team   │
 ├──────────────┴──────────────────────────────┤
-│ [Workers]    ┌────────┬────────┬────────┐   │
-│              │Worker 1│Worker 2│Worker 3│   │
-│              └────────┴────────┴────────┘   │
+│ [Players]    ┌────┬────┬────┐  FW           │
+│              ├────┼────┼────┤  MF           │
+│              ├────┼────┼────┤  DF           │
+│              └────┴────┴────┘  GK           │
+├─────────────────────────────────────────────┤
+│ [VAR]        │ Monitoring & control         │
 └─────────────────────────────────────────────┘
 ```
 
-See `examples/corporate.kdl` for a ready-to-use layout.
+See `examples/soccer-team.kdl` for a ready-to-use layout.
 
 ### Start the layout
 
 ```bash
-zellij -l ~/.config/zellij/layouts/corporate.kdl
+zellij -l soccer-team.kdl
 ```
 
 ### Send commands between agents
 
 ```bash
-# CEO sends task to Manager
+# Coach sends tactical instruction to Captain
 zellij action pipe \
   --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
-  -- '{"pane_id": 2, "text": "/task Analyze the codebase", "send_enter": true}'
+  -- '{"pane_id": 2, "text": "/task Press high and win the ball", "send_enter": true}'
 ```
 
 ## License

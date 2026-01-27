@@ -1,0 +1,66 @@
+// Multi-Agent Layout (Soccer Team Structure)
+// Coach → Captain → Players hierarchy
+
+layout {
+    // Tab bar template
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+        children
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+
+    // Coach tab (receives instructions from human, tactical planning)
+    tab name="Coach" focus=true {
+        pane name="coach" {
+            // Uncomment to auto-start Claude Code
+            // command "claude"
+            // args "--profile" "coach"
+        }
+    }
+
+    // Captain tab (relays instructions, coordinates team)
+    tab name="Captain" {
+        pane name="captain" {
+            // command "claude"
+            // args "--profile" "captain"
+        }
+    }
+
+    // Players tab (11 panes for the starting lineup)
+    tab name="Players" {
+        pane split_direction="vertical" {
+            // Forwards
+            pane split_direction="horizontal" {
+                pane name="fw-left"
+                pane name="fw-center"
+                pane name="fw-right"
+            }
+            // Midfielders
+            pane split_direction="horizontal" {
+                pane name="mf-left"
+                pane name="mf-center-1"
+                pane name="mf-center-2"
+                pane name="mf-right"
+            }
+            // Defenders & Goalkeeper
+            pane split_direction="horizontal" {
+                pane name="df-left"
+                pane name="df-center-1"
+                pane name="df-center-2"
+                pane name="df-right"
+                pane name="gk"
+            }
+        }
+    }
+
+    // Plugin tab (for management/monitoring - like VAR room)
+    tab name="VAR" {
+        pane {
+            plugin location="file:~/.config/zellij/plugins/zellij-send-keys.wasm"
+        }
+    }
+}
