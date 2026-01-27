@@ -1,0 +1,47 @@
+#!/bin/bash
+# send-to-coaching - Send message to coaching staff member
+# Usage: send-to-coaching <member> "message"
+# Members: coach, assistant, tactician, tester, worker-a, worker-b
+
+set -e
+
+MEMBER="$1"
+MESSAGE="$2"
+
+if [ -z "$MEMBER" ] || [ -z "$MESSAGE" ]; then
+    echo "Usage: send-to-coaching <member> \"message\""
+    echo "Members: coach, assistant, tactician, tester, worker-a, worker-b"
+    exit 1
+fi
+
+# Map member to pane ID
+case "$MEMBER" in
+    coach)      PANE_ID=0 ;;
+    assistant)  PANE_ID=1 ;;
+    tactician)  PANE_ID=2 ;;
+    tester)     PANE_ID=3 ;;
+    worker-a)   PANE_ID=4 ;;
+    worker-b)   PANE_ID=5 ;;
+    *)
+        echo "Unknown member: $MEMBER"
+        echo "Valid members: coach, assistant, tactician, tester, worker-a, worker-b"
+        exit 1
+        ;;
+esac
+
+# Auto-detect session
+ZELLIJ_SESSION=$(zellij list-sessions 2>/dev/null | grep -v EXITED | head -1 | awk '{print $1}')
+if [ -z "$ZELLIJ_SESSION" ]; then
+    echo "No active zellij session found"
+    exit 1
+fi
+
+ZELLIJ_PLUGIN="file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm"
+
+# Send message
+ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
+    --plugin "$ZELLIJ_PLUGIN" \
+    --name send_keys \
+    -- "{\"pane_id\": ${PANE_ID}, \"text\": \"${MESSAGE}\", \"send_enter\": true}"
+
+echo "Sent to $MEMBER (pane $PANE_ID)"
