@@ -122,7 +122,7 @@ This plugin enables building a hierarchical AI agent system in zellij, similar t
 
 ### Example Layout (Coaching Staff - Recommended)
 
-An 8-person team organized into tabs:
+An 8-person team of specialists, organized into tabs:
 
 ```
 Tabs:
@@ -152,14 +152,16 @@ send-to-worker-a "Implement authentication"
 
 | Pane ID | Role | Responsibility |
 |---------|------|----------------|
-| 0 | Coach | Lead, final decision |
-| 1 | Reviewer | Code review, design guardrails |
-| 2 | Tactician | Architecture, design |
-| 3 | QA Lead | Quality strategy, release criteria |
-| 4 | Coordinator | Project coordination, blockers |
-| 5 | Tester | Testing, QA execution |
-| 6 | Worker A | Implementation |
-| 7 | Worker B | Implementation |
+| 0 | Coach | Lead specialist, final decision |
+| 1 | Reviewer | Code review specialist, design guardrails |
+| 2 | Tactician | Architecture specialist, design strategy |
+| 3 | QA Lead | Quality specialist, release criteria |
+| 4 | Coordinator | Coordination specialist, blockers |
+| 5 | Tester | Testing specialist, QA execution |
+| 6 | Worker A | Implementation specialist |
+| 7 | Worker B | Implementation specialist |
+
+Balance rationale: one lead specialist, two implementation specialists, and dedicated specialists for review, architecture, quality, coordination, and testing. This keeps decision flow clear while preserving parallel execution and quality control.
 
 ### Quick Start (Coaching Staff)
 

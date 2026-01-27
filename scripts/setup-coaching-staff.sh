@@ -4,14 +4,14 @@
 # Usage: source ./setup-coaching-staff.sh [session_name]
 #
 # Pane IDs (coaching-staff.kdl):
-#   0: coach       - Lead and final decision maker
-#   1: reviewer    - Code review and design guardrails
-#   2: tactician   - Architecture and technical strategy
-#   3: qa-lead     - Quality strategy and release criteria
-#   4: coordinator - Project coordination and blockers
-#   5: tester      - Testing execution and coverage
-#   6: worker-a    - Implementation
-#   7: worker-b    - Implementation
+#   0: coach       - Lead specialist and final decision maker
+#   1: reviewer    - Code review specialist and design guardrails
+#   2: tactician   - Architecture specialist and technical strategy
+#   3: qa-lead     - Quality specialist and release criteria
+#   4: coordinator - Coordination specialist and blockers
+#   5: tester      - Testing specialist and coverage
+#   6: worker-a    - Implementation specialist
+#   7: worker-b    - Implementation specialist
 
 # Auto-detect session if not provided
 if [ -n "$1" ]; then
