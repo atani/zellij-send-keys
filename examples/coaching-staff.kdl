@@ -12,14 +12,14 @@ layout {
         }
     }
 
-    // Coach: Lead, integration, and final decision maker
+    // Coach: Lead specialist, integration, and final decision maker
     tab name="Coach" focus=true {
         pane name="coach" {
             command "claude"
         }
     }
 
-    // Reviewer: Code review and design guardrails
+    // Reviewer: Code review specialist and design guardrails
     tab name="Reviewer" {
         pane name="reviewer" {
             command "claude"
@@ -29,11 +29,11 @@ layout {
     // Strategy: Architecture and quality strategy
     tab name="Strategy" {
         pane split_direction="vertical" {
-            // Tactician: Architecture, patterns, and system design
+            // Tactician: Architecture specialist, patterns, and system design
             pane name="tactician" {
                 command "claude"
             }
-            // QA Lead: Test strategy, quality bar, and release criteria
+            // QA Lead: Quality specialist, test strategy, and release criteria
             pane name="qa-lead" {
                 command "claude"
             }
@@ -43,11 +43,11 @@ layout {
     // Operations: Coordination and test execution
     tab name="Operations" {
         pane split_direction="vertical" {
-            // Coordinator: Dependency tracking, blockers, and cross-team sync
+            // Coordinator: Coordination specialist, blockers, and cross-team sync
             pane name="coordinator" {
                 command "claude"
             }
-            // Tester: Implements tests and finds edge cases
+            // Tester: Testing specialist for coverage and edge cases
             pane name="tester" {
                 command "claude"
             }
@@ -57,11 +57,11 @@ layout {
     // Workers: Implementation
     tab name="Workers" {
         pane split_direction="vertical" {
-            // Worker A: Implementation focus
+            // Worker A: Implementation specialist
             pane name="worker-a" {
                 command "claude"
             }
-            // Worker B: Implementation focus
+            // Worker B: Implementation specialist
             pane name="worker-b" {
                 command "claude"
             }
