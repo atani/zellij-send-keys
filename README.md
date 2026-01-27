@@ -124,15 +124,15 @@ A practical 6-person team for real development work:
 
 ```
 ┌─────────────────────────────────────┐
-│ Coach (総監督・統合・最終判断)       │
+│ Coach (Lead, integration, final call) │
 ├─────────────────────────────────────┤
-│ Assistant (調整・レビュー・進捗管理) │
+│ Assistant (coordination, review, progress) │
 ├──────────────────┬──────────────────┤
 │ Tactician        │ Tester           │
-│ (設計・戦術)      │ (テスト・QA)     │
+│ (design/strategy)│ (testing/QA)     │
 ├──────────────────┼──────────────────┤
 │ Worker A         │ Worker B         │
-│ (実装)           │ (実装)           │
+│ (implementation) │ (implementation) │
 └──────────────────┴──────────────────┘
 ```
 
@@ -144,64 +144,34 @@ zellij -l examples/coaching-staff.kdl
 source scripts/setup-coaching-staff.sh
 
 # 3. Send commands
-send-to-coach "PRをレビューして"
-send-to-tactician "APIの設計を考えて"
-send-to-tester "テストを書いて"
-send-to-worker-a "認証機能を実装して"
+send-to-coach "Review the PR"
+send-to-tactician "Design the API"
+send-to-tester "Write tests"
+send-to-worker-a "Implement authentication"
 ```
 
-| Pane ID | Role | 役割 |
-|---------|------|------|
-| 0 | Coach | 総監督・最終判断 |
-| 1 | Assistant | 調整・レビュー |
-| 2 | Tactician | 設計・アーキテクチャ |
-| 3 | Tester | テスト・QA |
-| 4 | Worker A | 実装 |
-| 5 | Worker B | 実装 |
+| Pane ID | Role | Responsibility |
+|---------|------|----------------|
+| 0 | Coach | Lead, final decision |
+| 1 | Assistant | Coordination, review |
+| 2 | Tactician | Architecture, design |
+| 3 | Tester | Testing, QA |
+| 4 | Worker A | Implementation |
+| 5 | Worker B | Implementation |
 
-### Example Layout (Soccer Team Structure)
-
-```
-┌─────────────────────────────────────────────┐
-│ [Coach]      │ Tactical planning            │
-├──────────────┼──────────────────────────────┤
-│ [Captain]    │ Relay instructions to team   │
-├──────────────┴──────────────────────────────┤
-│ [Players]    ┌────┬────┬────┐  FW           │
-│              ├────┼────┼────┤  MF           │
-│              ├────┼────┼────┤  DF           │
-│              └────┴────┴────┘  GK           │
-├─────────────────────────────────────────────┤
-│ [VAR]        │ Monitoring & control         │
-└─────────────────────────────────────────────┘
-```
-
-See `examples/soccer-team.kdl` for a ready-to-use layout.
-
-### Quick Start
+### Quick Start (Coaching Staff)
 
 ```bash
 # 1. Start the layout
-zellij -l examples/soccer-team.kdl
+zellij -l examples/coaching-staff.kdl
 
 # 2. In another terminal, set up the environment
 source scripts/setup-env.sh
 
 # 3. Send commands to agents
-send-to-coach "Analyze the opponent's formation"
-send-to-captain "Tell the midfielders to press higher"
+send-to-coach "Summarize the codebase"
+send-to-tactician "Draft an API plan"
 ```
-
-### Pane IDs in Soccer Team Layout
-
-| Pane ID | Role |
-|---------|------|
-| 0 | Coach |
-| 1 | Captain |
-| 2-4 | Forwards (FW) |
-| 5-8 | Midfielders (MF) |
-| 9-12 | Defenders (DF) |
-| 13 | Goalkeeper (GK) |
 
 ## License
 
