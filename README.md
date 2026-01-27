@@ -1,121 +1,123 @@
-# zellij-multiagent
+# zellij-send-keys
 
-zellijでマルチエージェント環境を構築するためのプラグイン。
-tmuxの`send-keys`に相当する機能を提供します。
+A zellij plugin that provides `send-keys` functionality similar to tmux.
+Send text/commands to specific panes from outside or other panes.
 
-## 機能
+## Features
 
-- **send_keys**: 指定したペインにテキストを送信
-- **list_panes**: ペイン一覧を取得
+- **send_keys**: Send text to a specific pane by ID
+- **list_panes**: Get a list of all panes with their IDs
 
-## ビルド
+## Installation
+
+### From Release
+
+Download the `.wasm` file from [Releases](https://github.com/atani/zellij-send-keys/releases) and copy it to your zellij plugins directory:
 
 ```bash
-# wasm32-wasip1ターゲットを追加（初回のみ）
+mkdir -p ~/.config/zellij/plugins
+cp zellij-send-keys.wasm ~/.config/zellij/plugins/
+```
+
+### From Source
+
+```bash
+# Add wasm target (first time only)
 rustup target add wasm32-wasip1
 
-# ビルド
+# Build
 cargo build --target wasm32-wasip1 --release
+
+# Install
+cp target/wasm32-wasip1/release/zellij-send-keys.wasm ~/.config/zellij/plugins/
 ```
 
-## 使用方法
+## Usage
 
-### 1. プラグインをインストール
-
-```bash
-# zellijのプラグインディレクトリにコピー
-mkdir -p ~/.config/zellij/plugins
-cp target/wasm32-wasip1/release/zellij-multiagent.wasm ~/.config/zellij/plugins/
-```
-
-### 2. プラグインを起動
+### Send text to a pane
 
 ```bash
-# フローティングペインとして起動
-zellij plugin -- file:~/.config/zellij/plugins/zellij-multiagent.wasm
-```
-
-### 3. コマンドを送信
-
-```bash
-# 指定ペインにテキストを送信（Enter付き）
+# Send "echo hello" to pane 1 and press Enter
 zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-multiagent.wasm \
+  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
   -- '{"pane_id": 1, "text": "echo hello", "send_enter": true}'
 
-# Enterなしでテキストのみ送信
+# Send text without Enter
 zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-multiagent.wasm \
+  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
   --name send_keys \
   -- '{"pane_id": 1, "text": "partial text"}'
 ```
 
-## マルチエージェント構成例
+### Comparison with tmux
 
-記事「[Claude Codeでマルチエージェント構築を実現する手法](https://zenn.dev/shio_shoppaize/articles/5fee11d03a11a1)」のzellij版。
-
-### レイアウトファイル（multiagent.kdl）
-
-```kdl
-layout {
-    tab name="shogun" {
-        pane name="将軍" command="claude" {
-            args "--profile" "shogun"
-        }
-    }
-    tab name="karo" {
-        pane name="家老" command="claude" {
-            args "--profile" "karo"
-        }
-    }
-    tab name="ashigaru" {
-        pane split_direction="vertical" {
-            pane split_direction="horizontal" {
-                pane name="足軽1" command="claude"
-                pane name="足軽2" command="claude"
-            }
-            pane split_direction="horizontal" {
-                pane name="足軽3" command="claude"
-                pane name="足軽4" command="claude"
-            }
-        }
-    }
-}
-```
-
-### 起動
-
-```bash
-zellij -l multiagent.kdl
-```
+| tmux | zellij-send-keys |
+|------|------------------|
+| `tmux send-keys -t 1 "echo hello" Enter` | `zellij action pipe --plugin file:...wasm --name send_keys -- '{"pane_id":1,"text":"echo hello","send_enter":true}'` |
 
 ## API
 
 ### send_keys
 
-指定したペインにテキストを送信します。
+Send text to the STDIN of a specific pane.
 
-**パラメータ:**
-- `pane_id` (u32): 送信先ターミナルペインのID
-- `text` (string): 送信するテキスト
-- `send_enter` (bool, optional): Enterキーを送信するか（デフォルト: false）
+**Parameters:**
+- `pane_id` (u32): Target terminal pane ID
+- `text` (string): Text to send
+- `send_enter` (bool, optional): Whether to send Enter key after text (default: false)
 
-**例:**
+**Example:**
 ```json
-{"pane_id": 1, "text": "/task 調査開始", "send_enter": true}
+{"pane_id": 1, "text": "npm run build", "send_enter": true}
 ```
 
 ### list_panes
 
-現在のペイン一覧を表示します。
+Display a list of available panes with their IDs.
 
 ```bash
 zellij action pipe \
-  --plugin file:~/.config/zellij/plugins/zellij-multiagent.wasm \
+  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
   --name list_panes
 ```
 
-## ライセンス
+## Use Case: Multi-Agent AI System
+
+This plugin enables building a hierarchical AI agent system in zellij, similar to what's possible with tmux.
+
+### Example Layout (Corporate Structure)
+
+```
+┌─────────────────────────────────────────────┐
+│ [CEO]        │ Strategic planning           │
+├──────────────┼──────────────────────────────┤
+│ [Manager]    │ Task breakdown & delegation  │
+├──────────────┴──────────────────────────────┤
+│ [Workers]    ┌────────┬────────┬────────┐   │
+│              │Worker 1│Worker 2│Worker 3│   │
+│              └────────┴────────┴────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+See `examples/corporate.kdl` for a ready-to-use layout.
+
+### Start the layout
+
+```bash
+zellij -l ~/.config/zellij/layouts/corporate.kdl
+```
+
+### Send commands between agents
+
+```bash
+# CEO sends task to Manager
+zellij action pipe \
+  --plugin file:~/.config/zellij/plugins/zellij-send-keys.wasm \
+  --name send_keys \
+  -- '{"pane_id": 2, "text": "/task Analyze the codebase", "send_enter": true}'
+```
+
+## License
 
 MIT

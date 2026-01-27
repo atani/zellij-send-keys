@@ -1,7 +1,12 @@
 [package]
-name = "zellij-multiagent"
+name = "zellij-send-keys"
 version = "0.1.0"
 edition = "2021"
+description = "A zellij plugin to send keys to specific panes (like tmux send-keys)"
+license = "MIT"
+repository = "https://github.com/atani/zellij-send-keys"
+keywords = ["zellij", "plugin", "terminal", "multiplexer"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 zellij-tile = "0.43.1"
