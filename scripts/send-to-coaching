@@ -44,10 +44,14 @@ fi
 
 ZELLIJ_PLUGIN="file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm"
 
+# Build JSON payload safely using jq (-c for compact output)
+JSON_PAYLOAD=$(jq -cn --argjson pane_id "$PANE_ID" --arg text "$MESSAGE" \
+    '{pane_id: $pane_id, text: $text, send_enter: true}')
+
 # Send message
 ZELLIJ_SESSION_NAME="$ZELLIJ_SESSION" zellij action pipe \
     --plugin "$ZELLIJ_PLUGIN" \
     --name send_keys \
-    -- "{\"pane_id\": ${PANE_ID}, \"text\": \"${MESSAGE}\", \"send_enter\": true}"
+    -- "$JSON_PAYLOAD"
 
 echo "Sent to $MEMBER (pane $PANE_ID)"
