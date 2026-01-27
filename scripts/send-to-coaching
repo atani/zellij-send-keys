@@ -1,15 +1,16 @@
 #!/bin/bash
 # send-to-coaching - Send message to coaching staff member
-# Usage: send-to-coaching <member> "message"
+# Usage: send-to-coaching <member> "message" [session]
 # Members: coach, assistant, tactician, tester, worker-a, worker-b
 
 set -e
 
 MEMBER="$1"
 MESSAGE="$2"
+SESSION="$3"
 
 if [ -z "$MEMBER" ] || [ -z "$MESSAGE" ]; then
-    echo "Usage: send-to-coaching <member> \"message\""
+    echo "Usage: send-to-coaching <member> \"message\" [session]"
     echo "Members: coach, assistant, tactician, tester, worker-a, worker-b"
     exit 1
 fi
@@ -29,8 +30,13 @@ case "$MEMBER" in
         ;;
 esac
 
-# Auto-detect session
-ZELLIJ_SESSION=$(zellij list-sessions 2>/dev/null | grep -v EXITED | head -1 | awk '{print $1}')
+# Session: use argument, or ZELLIJ_SESSION env, or current repo name
+if [ -n "$SESSION" ]; then
+    ZELLIJ_SESSION="$SESSION"
+elif [ -z "$ZELLIJ_SESSION" ]; then
+    ZELLIJ_SESSION=$(basename "$PWD")
+fi
+
 if [ -z "$ZELLIJ_SESSION" ]; then
     echo "No active zellij session found"
     exit 1

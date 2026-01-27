@@ -1,2 +1,2 @@
 #\!/bin/bash
-exec /Users/a.taniwaki/src/github.com/atani/zellij-send-keys/scripts/send-to-coaching coach "$@"
+exec /Users/a.taniwaki/src/github.com/atani/zellij-send-keys/scripts/send-to-coaching coach "$1" "$2"

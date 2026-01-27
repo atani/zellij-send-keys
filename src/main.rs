@@ -131,9 +131,8 @@ impl State {
         // テキストを送信
         write_chars_to_pane_id(&msg.text, pane_id);
 
-        // Enterキーを含める場合は、バイトとしてCRを送信
+        // Enterキーを含める場合は CR を送信
         if msg.send_enter {
-            // CR (0x0D) をバイトとして送信
             write_to_pane_id(vec![0x0D], pane_id);
         }
 
