@@ -14,27 +14,39 @@ layout {
 
     // Coach: 総監督・統合・最終判断
     tab name="Coach" focus=true {
-        pane name="coach"
+        pane name="coach" {
+            command "claude"
+        }
     }
 
     // Assistant: 調整・レビュー・進捗管理
     tab name="Assistant" {
-        pane name="assistant"
+        pane name="assistant" {
+            command "claude"
+        }
     }
 
     // Staff: Tactician & Tester
     tab name="Staff" {
         pane split_direction="vertical" {
-            pane name="tactician"  // 設計・戦術
-            pane name="tester"     // テスト・QA
+            pane name="tactician" {
+                command "claude"
+            }
+            pane name="tester" {
+                command "claude"
+            }
         }
     }
 
     // Workers: 実装担当
     tab name="Workers" {
         pane split_direction="vertical" {
-            pane name="worker-a"
-            pane name="worker-b"
+            pane name="worker-a" {
+                command "claude"
+            }
+            pane name="worker-b" {
+                command "claude"
+            }
         }
     }
 
