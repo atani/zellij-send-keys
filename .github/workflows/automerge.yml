@@ -13,7 +13,7 @@ jobs:
     if: github.actor == 'dependabot[bot]'
     steps:
       - name: Wait for CI
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.5.0
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           check-name: 'build'
