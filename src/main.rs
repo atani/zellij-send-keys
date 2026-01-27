@@ -1,5 +1,5 @@
-use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 use zellij_tile::prelude::*;
 
 /// プラグインの状態
@@ -36,13 +36,13 @@ impl ZellijPlugin for State {
     fn load(&mut self, _configuration: BTreeMap<String, String>) {
         // 必要なパーミッションを要求
         request_permission(&[
-            PermissionType::WriteToStdin,  // ペインへの書き込み
+            PermissionType::WriteToStdin,         // ペインへの書き込み
             PermissionType::ReadApplicationState, // ペイン一覧の取得
         ]);
 
         // イベントを購読
         subscribe(&[
-            EventType::PaneUpdate,  // ペイン情報の更新
+            EventType::PaneUpdate, // ペイン情報の更新
         ]);
     }
 
