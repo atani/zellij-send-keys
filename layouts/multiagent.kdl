@@ -1,0 +1,65 @@
+// マルチエージェント用レイアウト（戦国時代モチーフ）
+// 将軍→家老→足軽の階層構造
+
+layout {
+    // タブバー
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+        children
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+
+    // 将軍タブ（人間からの指示を受ける）
+    tab name="将軍" focus=true {
+        pane name="shogun" {
+            // Claude Codeを起動（プロファイル指定可能）
+            // command "claude"
+            // args "--profile" "shogun"
+        }
+    }
+
+    // 家老タブ（タスクを分解して足軽に指示）
+    tab name="家老" {
+        pane name="karo" {
+            // command "claude"
+            // args "--profile" "karo"
+        }
+    }
+
+    // 足軽タブ（8ペインで並列実行）
+    tab name="足軽" {
+        pane split_direction="vertical" {
+            pane split_direction="horizontal" {
+                pane split_direction="vertical" {
+                    pane name="ashigaru-1"
+                    pane name="ashigaru-2"
+                }
+                pane split_direction="vertical" {
+                    pane name="ashigaru-3"
+                    pane name="ashigaru-4"
+                }
+            }
+            pane split_direction="horizontal" {
+                pane split_direction="vertical" {
+                    pane name="ashigaru-5"
+                    pane name="ashigaru-6"
+                }
+                pane split_direction="vertical" {
+                    pane name="ashigaru-7"
+                    pane name="ashigaru-8"
+                }
+            }
+        }
+    }
+
+    // プラグインタブ（管理用）
+    tab name="管理" {
+        pane {
+            plugin location="file:~/.config/zellij/plugins/zellij-multiagent.wasm"
+        }
+    }
+}
