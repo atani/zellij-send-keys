@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use zellij_tile::prelude::*;
 
 /// プラグインの状態
@@ -9,6 +9,8 @@ struct State {
     last_message: Option<String>,
     /// ペイン一覧のキャッシュ
     panes: Vec<PaneInfo>,
+    /// Enter送信待ちキュー（pane_id）
+    pending_enter: VecDeque<u32>,
 }
 
 /// pipeメッセージの形式
@@ -43,6 +45,7 @@ impl ZellijPlugin for State {
         // イベントを購読
         subscribe(&[
             EventType::PaneUpdate, // ペイン情報の更新
+            EventType::Timer,      // 遅延Enter送信用
         ]);
     }
 
@@ -60,6 +63,14 @@ impl ZellijPlugin for State {
                         is_focused: p.is_focused,
                     })
                     .collect();
+                true
+            }
+            Event::Timer(_elapsed) => {
+                // 遅延Enter送信
+                if let Some(pane_id) = self.pending_enter.pop_front() {
+                    let pane = PaneId::Terminal(pane_id);
+                    write_to_pane_id(vec![b'\r'], pane);
+                }
                 true
             }
             _ => false,
@@ -127,16 +138,13 @@ impl State {
 
         // 指定ペインにテキストを送信
         let pane_id = PaneId::Terminal(msg.pane_id);
+        write_to_pane_id(msg.text.as_bytes().to_vec(), pane_id);
 
-        // テキストを送信（Enterを含む場合は末尾に\rを追加して一緒に送信）
-        // 別々の関数呼び出しだと非同期処理で順序が保証されないため、
-        // 同じ write_chars_to_pane_id で送信することで確実に順序を保つ
-        let text_to_send = if msg.send_enter {
-            format!("{}\r", msg.text)
-        } else {
-            msg.text.clone()
-        };
-        write_chars_to_pane_id(&text_to_send, pane_id);
+        // Enterはタイマーで遅延送信（テキストが確実に処理された後に送る）
+        if msg.send_enter {
+            self.pending_enter.push_back(msg.pane_id);
+            set_timeout(0.2); // 200ms後にEnter送信
+        }
 
         eprintln!(
             "send_keys: Sent '{}' to pane {} (enter: {})",
