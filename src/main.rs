@@ -128,13 +128,15 @@ impl State {
         // 指定ペインにテキストを送信
         let pane_id = PaneId::Terminal(msg.pane_id);
 
-        // テキストを送信
-        write_chars_to_pane_id(&msg.text, pane_id);
-
-        // Enterキーを含める場合は CR を送信
-        if msg.send_enter {
-            write_to_pane_id(vec![0x0D], pane_id);
-        }
+        // テキストを送信（Enterを含む場合は末尾に\rを追加して一緒に送信）
+        // 別々の関数呼び出しだと非同期処理で順序が保証されないため、
+        // 同じ write_chars_to_pane_id で送信することで確実に順序を保つ
+        let text_to_send = if msg.send_enter {
+            format!("{}\r", msg.text)
+        } else {
+            msg.text.clone()
+        };
+        write_chars_to_pane_id(&text_to_send, pane_id);
 
         eprintln!(
             "send_keys: Sent '{}' to pane {} (enter: {})",
