@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, VecDeque};
+use zellij_send_keys::{parse_send_keys_message, serialize_panes, PaneInfo, PaneType};
 use zellij_tile::prelude::*;
 
 /// プラグインの状態
@@ -7,29 +7,10 @@ use zellij_tile::prelude::*;
 struct State {
     /// 最後に処理したメッセージ（デバッグ用）
     last_message: Option<String>,
-    /// ペイン一覧のキャッシュ
+    /// ペイン一覧のキャッシュ（plugin/suppressedを含む全ペイン）
     panes: Vec<PaneInfo>,
     /// Enter送信待ちキュー（pane_id）
-    pending_enter: VecDeque<u32>,
-}
-
-/// pipeメッセージの形式
-#[derive(Deserialize, Debug)]
-struct SendKeysMessage {
-    /// 送信先ペインID（Terminal ID）
-    pane_id: u32,
-    /// 送信するテキスト
-    text: String,
-    /// Enterキーを送信するか
-    #[serde(default)]
-    send_enter: bool,
-}
-
-#[derive(Serialize, Clone, Debug, Default)]
-struct PaneInfo {
-    id: u32,
-    name: Option<String>,
-    is_focused: bool,
+    pending_enter: VecDeque<PaneId>,
 }
 
 register_plugin!(State);
@@ -52,15 +33,18 @@ impl ZellijPlugin for State {
     fn update(&mut self, event: Event) -> bool {
         match event {
             Event::PaneUpdate(pane_manifest) => {
-                // ペイン一覧を更新
+                // suppressedペインは除外、plugin/terminalは両方保持
                 self.panes = pane_manifest
                     .panes
                     .values()
                     .flat_map(|tab_panes| tab_panes.iter())
+                    .filter(|p| !p.is_suppressed)
                     .map(|p| PaneInfo {
                         id: p.id,
                         name: Some(p.title.clone()),
                         is_focused: p.is_focused,
+                        is_plugin: p.is_plugin,
+                        is_suppressed: p.is_suppressed,
                     })
                     .collect();
                 true
@@ -68,8 +52,7 @@ impl ZellijPlugin for State {
             Event::Timer(_elapsed) => {
                 // 遅延Enter送信
                 if let Some(pane_id) = self.pending_enter.pop_front() {
-                    let pane = PaneId::Terminal(pane_id);
-                    write_to_pane_id(vec![b'\r'], pane);
+                    write_to_pane_id(vec![b'\r'], pane_id);
                 }
                 true
             }
@@ -82,15 +65,17 @@ impl ZellijPlugin for State {
         match pipe_message.name.as_str() {
             "send_keys" => {
                 self.handle_send_keys(&pipe_message.payload);
+                true
             }
             "list_panes" => {
                 self.handle_list_panes();
+                true
             }
             _ => {
-                eprintln!("Unknown pipe command: {}", pipe_message.name);
+                eprintln!("Unknown pipe command: {:?}", pipe_message.name);
+                false
             }
         }
-        true
     }
 
     fn render(&mut self, _rows: usize, _cols: usize) {
@@ -101,9 +86,11 @@ impl ZellijPlugin for State {
             println!("Last message: {}", msg);
         }
 
+        // terminalペインのみ表示
+        let terminal_panes: Vec<_> = self.panes.iter().filter(|p| !p.is_plugin).collect();
         println!();
-        println!("Available panes ({}):", self.panes.len());
-        for pane in &self.panes {
+        println!("Available panes ({}):", terminal_panes.len());
+        for pane in &terminal_panes {
             let focused = if pane.is_focused { " [focused]" } else { "" };
             let name = pane.name.as_deref().unwrap_or("(unnamed)");
             println!("  - ID: {}, Name: {}{}", pane.id, name, focused);
@@ -123,38 +110,54 @@ impl State {
             return;
         };
 
-        let msg: SendKeysMessage = match serde_json::from_str(payload) {
+        let msg = match parse_send_keys_message(payload) {
             Ok(m) => m,
             Err(e) => {
-                eprintln!("send_keys: Failed to parse JSON: {}", e);
+                eprintln!("send_keys: {}", e);
                 return;
             }
         };
 
+        // ペインの存在チェック（IDとタイプの両方を確認）
+        if !self
+            .panes
+            .iter()
+            .any(|p| p.matches(msg.pane_id, msg.pane_type))
+        {
+            eprintln!(
+                "send_keys: Pane ID {} (type: {:?}) not found in cached panes",
+                msg.pane_id, msg.pane_type
+            );
+            return;
+        }
+
         self.last_message = Some(format!(
-            "Sending '{}' to pane {} (enter: {})",
-            msg.text, msg.pane_id, msg.send_enter
+            "Sending to pane {} (type: {:?}, enter: {})",
+            msg.pane_id, msg.pane_type, msg.send_enter
         ));
 
-        // 指定ペインにテキストを送信
-        let pane_id = PaneId::Terminal(msg.pane_id);
+        // ペインタイプに応じてPaneIdを構築
+        let pane_id = match msg.pane_type {
+            PaneType::Plugin => PaneId::Plugin(msg.pane_id),
+            PaneType::Terminal => PaneId::Terminal(msg.pane_id),
+        };
+
+        // テキストを送信
         write_to_pane_id(msg.text.as_bytes().to_vec(), pane_id);
 
         // Enterはタイマーで遅延送信（テキストが確実に処理された後に送る）
         if msg.send_enter {
-            self.pending_enter.push_back(msg.pane_id);
+            self.pending_enter.push_back(pane_id);
             set_timeout(0.2); // 200ms後にEnter送信
         }
 
         eprintln!(
-            "send_keys: Sent '{}' to pane {} (enter: {})",
-            msg.text, msg.pane_id, msg.send_enter
+            "send_keys: Sent to pane {} (type: {:?}, enter: {})",
+            msg.pane_id, msg.pane_type, msg.send_enter
         );
     }
 
     fn handle_list_panes(&self) {
-        // ペイン一覧をJSON形式で出力
-        let panes_json = serde_json::to_string_pretty(&self.panes).unwrap_or_default();
-        println!("{}", panes_json);
+        println!("{}", serialize_panes(&self.panes));
     }
 }

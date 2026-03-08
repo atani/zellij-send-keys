@@ -2,6 +2,8 @@
 name = "zellij-send-keys"
 version = "0.2.0"
 edition = "2021"
+rust-version = "1.74.0"
+authors = ["atani"]
 description = "A zellij plugin to send keys to specific panes (like tmux send-keys)"
 license = "MIT"
 repository = "https://github.com/atani/zellij-send-keys"
