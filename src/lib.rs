@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-/// ペイロードの最大サイズ（64KBバイト）
+/// Maximum payload size (64KB)
 pub const MAX_TEXT_LENGTH: usize = 65536;
 
-/// ペインタイプ
+/// Pane type
 #[derive(Deserialize, Serialize, Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum PaneType {
@@ -12,22 +12,22 @@ pub enum PaneType {
     Plugin,
 }
 
-/// pipeメッセージの形式
+/// Pipe message format for send_keys command
 #[derive(Deserialize, Debug)]
 pub struct SendKeysMessage {
-    /// 送信先ペインID
+    /// Target pane ID
     pub pane_id: u32,
-    /// 送信するテキスト
+    /// Text to send
     pub text: String,
-    /// Enterキーを送信するか
+    /// Whether to send Enter key after the text
     #[serde(default)]
     pub send_enter: bool,
-    /// ペインタイプ（デフォルト: terminal）
+    /// Pane type (default: terminal)
     #[serde(default)]
     pub pane_type: PaneType,
 }
 
-/// ペイン情報
+/// Pane information
 #[derive(Serialize, Clone, Debug, Default)]
 pub struct PaneInfo {
     pub id: u32,
@@ -38,15 +38,15 @@ pub struct PaneInfo {
 }
 
 impl PaneInfo {
-    /// 指定されたIDとペインタイプに一致するか
+    /// Check if this pane matches the given ID and pane type
     pub fn matches(&self, pane_id: u32, pane_type: PaneType) -> bool {
         self.id == pane_id && self.is_plugin == (pane_type == PaneType::Plugin)
     }
 }
 
-/// JSON文字列からSendKeysMessageをパースし、バリデーションを行う
+/// Parse a JSON string into a SendKeysMessage with validation.
 ///
-/// テキスト長の上限は `MAX_TEXT_LENGTH` バイト（UTF-8エンコード後のバイト数）。
+/// Text length is limited to `MAX_TEXT_LENGTH` bytes (UTF-8 encoded).
 pub fn parse_send_keys_message(payload: &str) -> Result<SendKeysMessage, String> {
     let msg: SendKeysMessage =
         serde_json::from_str(payload).map_err(|e| format!("Failed to parse JSON: {}", e))?;
@@ -62,7 +62,7 @@ pub fn parse_send_keys_message(payload: &str) -> Result<SendKeysMessage, String>
     Ok(msg)
 }
 
-/// ペイン一覧をJSON文字列にシリアライズする
+/// Serialize pane list to a JSON string
 pub fn serialize_panes(panes: &[PaneInfo]) -> String {
     // PaneInfoは基本型のみで構成されるためシリアライズは失敗しない
     serde_json::to_string_pretty(panes).expect("PaneInfo serialization should never fail")

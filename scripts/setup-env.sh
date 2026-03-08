@@ -4,7 +4,7 @@
 # Usage: source ./setup-env.sh [session_name]
 # Example: source ./setup-env.sh my-session
 
-# jqが必要
+# Requires jq
 command -v jq >/dev/null 2>&1 || { echo "Error: jq is required but not installed."; return 1; }
 
 # Auto-detect session if not provided
@@ -28,7 +28,7 @@ send-to-pane() {
     local text="$2"
     local send_enter="${3:-true}"
 
-    # send_enterのバリデーション
+    # Validate send_enter
     if [ "$send_enter" != "true" ] && [ "$send_enter" != "false" ]; then
         echo "Error: send_enter must be 'true' or 'false' (got: '$send_enter')"
         return 1

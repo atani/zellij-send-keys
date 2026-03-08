@@ -2,14 +2,14 @@ use std::collections::{BTreeMap, VecDeque};
 use zellij_send_keys::{parse_send_keys_message, serialize_panes, PaneInfo, PaneType};
 use zellij_tile::prelude::*;
 
-/// プラグインの状態
+/// Plugin state
 #[derive(Default)]
 struct State {
-    /// 最後に処理したメッセージ（デバッグ用）
+    /// Last processed message (for debug display)
     last_message: Option<String>,
-    /// ペイン一覧のキャッシュ（plugin/suppressedを含む全ペイン）
+    /// Cached pane list (includes plugin panes, excludes suppressed)
     panes: Vec<PaneInfo>,
-    /// Enter送信待ちキュー（pane_id）
+    /// Queue of pending Enter key sends (delayed via timer)
     pending_enter: VecDeque<PaneId>,
 }
 
@@ -17,23 +17,18 @@ register_plugin!(State);
 
 impl ZellijPlugin for State {
     fn load(&mut self, _configuration: BTreeMap<String, String>) {
-        // 必要なパーミッションを要求
         request_permission(&[
-            PermissionType::WriteToStdin,         // ペインへの書き込み
-            PermissionType::ReadApplicationState, // ペイン一覧の取得
+            PermissionType::WriteToStdin,
+            PermissionType::ReadApplicationState,
         ]);
 
-        // イベントを購読
-        subscribe(&[
-            EventType::PaneUpdate, // ペイン情報の更新
-            EventType::Timer,      // 遅延Enter送信用
-        ]);
+        subscribe(&[EventType::PaneUpdate, EventType::Timer]);
     }
 
     fn update(&mut self, event: Event) -> bool {
         match event {
             Event::PaneUpdate(pane_manifest) => {
-                // suppressedペインは除外、plugin/terminalは両方保持
+                // Exclude suppressed panes; keep both plugin and terminal
                 self.panes = pane_manifest
                     .panes
                     .values()
@@ -50,7 +45,7 @@ impl ZellijPlugin for State {
                 true
             }
             Event::Timer(_elapsed) => {
-                // 遅延Enter送信
+                // Delayed Enter key send
                 if let Some(pane_id) = self.pending_enter.pop_front() {
                     write_to_pane_id(vec![b'\r'], pane_id);
                 }
@@ -61,7 +56,7 @@ impl ZellijPlugin for State {
     }
 
     fn pipe(&mut self, pipe_message: PipeMessage) -> bool {
-        // pipe名で処理を分岐
+        // Dispatch by pipe command name
         match pipe_message.name.as_str() {
             "send_keys" => {
                 self.handle_send_keys(&pipe_message.payload);
@@ -86,7 +81,7 @@ impl ZellijPlugin for State {
             println!("Last message: {}", msg);
         }
 
-        // terminalペインのみ表示
+        // Display terminal panes only
         let terminal_panes: Vec<_> = self.panes.iter().filter(|p| !p.is_plugin).collect();
         println!();
         println!("Available panes ({}):", terminal_panes.len());
@@ -118,7 +113,7 @@ impl State {
             }
         };
 
-        // ペインの存在チェック（IDとタイプの両方を確認）
+        // Verify pane exists (check both ID and type)
         if !self
             .panes
             .iter()
@@ -136,16 +131,16 @@ impl State {
             msg.pane_id, msg.pane_type, msg.send_enter
         ));
 
-        // ペインタイプに応じてPaneIdを構築
+        // Build PaneId based on pane type
         let pane_id = match msg.pane_type {
             PaneType::Plugin => PaneId::Plugin(msg.pane_id),
             PaneType::Terminal => PaneId::Terminal(msg.pane_id),
         };
 
-        // テキストを送信
+        // Send text
         write_to_pane_id(msg.text.as_bytes().to_vec(), pane_id);
 
-        // Enterはタイマーで遅延送信（テキストが確実に処理された後に送る）
+        // Delay Enter via timer to ensure text is processed first
         if msg.send_enter {
             self.pending_enter.push_back(pane_id);
             set_timeout(0.2); // 200ms後にEnter送信
