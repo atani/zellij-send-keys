@@ -4,6 +4,9 @@
 # Usage: source ./setup-env.sh [session_name]
 # Example: source ./setup-env.sh my-session
 
+# Requires jq
+command -v jq >/dev/null 2>&1 || { echo "Error: jq is required but not installed."; return 1; }
+
 # Auto-detect session if not provided
 if [ -n "$1" ]; then
     export ZELLIJ_SESSION="$1"
@@ -24,6 +27,13 @@ send-to-pane() {
     local pane_id="$1"
     local text="$2"
     local send_enter="${3:-true}"
+
+    # Validate send_enter
+    if [ "$send_enter" != "true" ] && [ "$send_enter" != "false" ]; then
+        echo "Error: send_enter must be 'true' or 'false' (got: '$send_enter')"
+        return 1
+    fi
+
     local json_payload
     json_payload=$(jq -cn --argjson pane_id "$pane_id" --arg text "$text" --argjson send_enter "$send_enter" \
         '{pane_id: $pane_id, text: $text, send_enter: $send_enter}')
