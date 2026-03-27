@@ -1,0 +1,10 @@
+[advisories]
+ignore = [
+    # zellij-tile transitive dependencies (not user-facing in WASI plugin context)
+    "RUSTSEC-2025-0052",
+    "RUSTSEC-2024-0375",
+    "RUSTSEC-2024-0384",
+    "RUSTSEC-2024-0370",
+    # cranelift-codegen: not exploitable in plugin compilation context
+    "RUSTSEC-2021-0145",
+]
