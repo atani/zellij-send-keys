@@ -2,6 +2,10 @@ use std::collections::{BTreeMap, VecDeque};
 use zellij_send_keys::{parse_send_keys_message, serialize_panes, PaneInfo, PaneType};
 use zellij_tile::prelude::*;
 
+/// Delay in seconds before sending Enter key after text.
+/// Allows the terminal to process the text before Enter is pressed.
+const ENTER_DELAY_SECS: f64 = 0.2;
+
 /// Plugin state
 #[derive(Default)]
 struct State {
@@ -28,26 +32,37 @@ impl ZellijPlugin for State {
     fn update(&mut self, event: Event) -> bool {
         match event {
             Event::PaneUpdate(pane_manifest) => {
-                // Exclude suppressed panes; keep both plugin and terminal
+                // Exclude suppressed panes; keep both plugin and terminal.
+                // Zellij assigns globally unique pane IDs across tabs.
                 self.panes = pane_manifest
                     .panes
                     .values()
                     .flat_map(|tab_panes| tab_panes.iter())
-                    .filter(|p| !p.is_suppressed)
-                    .map(|p| PaneInfo {
-                        id: p.id,
-                        name: Some(p.title.clone()),
-                        is_focused: p.is_focused,
-                        is_plugin: p.is_plugin,
-                        is_suppressed: p.is_suppressed,
+                    .filter(|pane| !pane.is_suppressed)
+                    .map(|pane| PaneInfo {
+                        id: pane.id,
+                        name: Some(pane.title.clone()),
+                        is_focused: pane.is_focused,
+                        is_plugin: pane.is_plugin,
                     })
                     .collect();
                 true
             }
-            Event::Timer(_elapsed) => {
-                // Delayed Enter key send
+            Event::Timer(_) => {
+                // Delayed Enter key send; verify pane still exists before writing
                 if let Some(pane_id) = self.pending_enter.pop_front() {
-                    write_to_pane_id(vec![b'\r'], pane_id);
+                    let pane_exists = self.panes.iter().any(|pane| match pane_id {
+                        PaneId::Terminal(id) => pane.id == id && !pane.is_plugin,
+                        PaneId::Plugin(id) => pane.id == id && pane.is_plugin,
+                    });
+                    if pane_exists {
+                        write_to_pane_id(vec![b'\r'], pane_id);
+                    } else {
+                        eprintln!(
+                            "Timer: target pane {:?} no longer exists, skipping Enter",
+                            pane_id
+                        );
+                    }
                 }
                 true
             }
@@ -82,7 +97,7 @@ impl ZellijPlugin for State {
         }
 
         // Display terminal panes only
-        let terminal_panes: Vec<_> = self.panes.iter().filter(|p| !p.is_plugin).collect();
+        let terminal_panes: Vec<_> = self.panes.iter().filter(|pane| !pane.is_plugin).collect();
         println!();
         println!("Available panes ({}):", terminal_panes.len());
         for pane in &terminal_panes {
@@ -94,7 +109,7 @@ impl ZellijPlugin for State {
         println!();
         println!("Usage:");
         println!("  zellij action pipe --plugin file:zellij-send-keys.wasm \\");
-        println!("    --name send_keys -- '{{\"pane_id\": 1, \"text\": \"hello\", \"send_enter\": true}}'");
+        println!("    --name send_keys -- '{{\"pane_id\": 1, \"text\": \"hello\", \"send_enter\": true, \"pane_type\": \"terminal\"}}'");
     }
 }
 
@@ -117,7 +132,7 @@ impl State {
         if !self
             .panes
             .iter()
-            .any(|p| p.matches(msg.pane_id, msg.pane_type))
+            .any(|pane| pane.matches(msg.pane_id, msg.pane_type))
         {
             eprintln!(
                 "send_keys: Pane ID {} (type: {:?}) not found in cached panes",
@@ -143,7 +158,7 @@ impl State {
         // Delay Enter via timer to ensure text is processed first
         if msg.send_enter {
             self.pending_enter.push_back(pane_id);
-            set_timeout(0.2); // 200ms後にEnter送信
+            set_timeout(ENTER_DELAY_SECS);
         }
 
         eprintln!(

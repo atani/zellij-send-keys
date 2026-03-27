@@ -99,18 +99,32 @@ send-to-pane 0 "partial text" false
 Send text to the STDIN of a specific pane.
 
 **Parameters:**
-- `pane_id` (u32): Target terminal pane ID
-- `text` (string): Text to send
+- `pane_id` (u32): Target pane ID
+- `text` (string): Text to send (max 64KB)
 - `send_enter` (bool, optional): Whether to send Enter key after text (default: false)
+- `pane_type` (string, optional): `"terminal"` or `"plugin"` (default: `"terminal"`)
 
 **Example:**
 ```json
 {"pane_id": 0, "text": "npm run build", "send_enter": true}
 ```
 
+**Send to a plugin pane:**
+```json
+{"pane_id": 3, "text": "cmd", "pane_type": "plugin"}
+```
+
 ### list_panes
 
-Display a list of available panes with their IDs. Launch the plugin to see the pane list:
+Get a JSON list of available panes with their IDs via the pipe API:
+
+```bash
+ZELLIJ_SESSION_NAME=<session_name> zellij action pipe \
+  --plugin file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm \
+  --name list_panes
+```
+
+Or launch the plugin UI to see panes interactively:
 
 ```bash
 zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
