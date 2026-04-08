@@ -7,6 +7,8 @@
 
 **Bring tmux's `send-keys` to Zellij.** Send text and commands to any pane, from anywhere.
 
+![demo](demo.gif)
+
 ## Why
 
 Zellij doesn't have a built-in `send-keys` equivalent.
