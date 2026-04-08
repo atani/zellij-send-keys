@@ -1,12 +1,32 @@
 # zellij-send-keys
 
-A zellij plugin that provides `send-keys` functionality similar to tmux.
-Send text/commands to specific panes from outside or other panes.
+[![CI](https://github.com/atani/zellij-send-keys/actions/workflows/ci.yml/badge.svg)](https://github.com/atani/zellij-send-keys/actions/workflows/ci.yml)
+[![Release](https://github.com/atani/zellij-send-keys/actions/workflows/release.yml/badge.svg)](https://github.com/atani/zellij-send-keys/actions/workflows/release.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/atani/zellij-send-keys)](https://github.com/atani/zellij-send-keys/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Bring tmux's `send-keys` to Zellij.** Send text and commands to any pane, from anywhere.
+
+## Why
+
+Zellij doesn't have a built-in `send-keys` equivalent.
+If you're migrating from tmux and rely on scripted pane control, this plugin fills that gap.
+CI runners, dev environment setup, AI agent orchestration -- all covered.
+
+```bash
+# tmux
+tmux send-keys -t 0 "echo hello" Enter
+
+# zellij-send-keys
+send-to-pane 0 "echo hello"
+```
 
 ## Features
 
-- **send_keys**: Send text to a specific pane by ID
-- **list_panes**: Get a list of all panes with their IDs
+- **send_keys** - Send text to a specific pane by ID (terminal or plugin pane)
+- **list_panes** - Get a list of all panes with their IDs
+- Works from outside a zellij session via `ZELLIJ_SESSION_NAME`
+- Helper script for a tmux-like `send-to-pane` command
 
 ## Installation
 
@@ -86,12 +106,6 @@ send-to-pane 1 "npm run build"
 send-to-pane 0 "partial text" false
 ```
 
-### Comparison with tmux
-
-| tmux | zellij-send-keys |
-|------|------------------|
-| `tmux send-keys -t 0 "echo hello" Enter` | `send-to-pane 0 "echo hello"` |
-
 ## API
 
 ### send_keys
@@ -129,6 +143,13 @@ Or launch the plugin UI to see panes interactively:
 ```bash
 zellij plugin -- file:$HOME/.config/zellij/plugins/zellij-send-keys.wasm
 ```
+
+## Use Cases
+
+- **Dev environment automation** - Start servers, watchers, and build tools across panes
+- **CI/CD integration** - Drive zellij sessions from external scripts
+- **AI agent orchestration** - Let AI tools send commands to terminal panes
+- **Pair programming** - Send commands to a colleague's pane in a shared session
 
 ## License
 
