@@ -1,5 +1,8 @@
 use std::collections::{BTreeMap, VecDeque};
-use zellij_send_keys::{parse_send_keys_message, serialize_panes, PaneInfo, PaneType};
+use zellij_send_keys::{
+    dispatch_pipe_command, parse_send_keys_message, pending_enter_target_exists, resolve_send_keys,
+    serialize_panes, PaneInfo, PaneTarget, PipeCommand,
+};
 use zellij_tile::prelude::*;
 
 /// Delay in seconds before sending Enter key after text.
@@ -51,11 +54,8 @@ impl ZellijPlugin for State {
             Event::Timer(_) => {
                 // Delayed Enter key send; verify pane still exists before writing
                 if let Some(pane_id) = self.pending_enter.pop_front() {
-                    let pane_exists = self.panes.iter().any(|pane| match pane_id {
-                        PaneId::Terminal(id) => pane.id == id && !pane.is_plugin,
-                        PaneId::Plugin(id) => pane.id == id && pane.is_plugin,
-                    });
-                    if pane_exists {
+                    let target = pane_id_to_target(pane_id);
+                    if pending_enter_target_exists(target, &self.panes) {
                         write_to_pane_id(vec![b'\r'], pane_id);
                     } else {
                         eprintln!(
@@ -72,16 +72,16 @@ impl ZellijPlugin for State {
 
     fn pipe(&mut self, pipe_message: PipeMessage) -> bool {
         // Dispatch by pipe command name
-        match pipe_message.name.as_str() {
-            "send_keys" => {
+        match dispatch_pipe_command(&pipe_message.name) {
+            PipeCommand::SendKeys => {
                 self.handle_send_keys(&pipe_message.payload);
                 true
             }
-            "list_panes" => {
+            PipeCommand::ListPanes => {
                 self.handle_list_panes();
                 true
             }
-            _ => {
+            PipeCommand::Unknown => {
                 eprintln!("Unknown pipe command: {:?}", pipe_message.name);
                 false
             }
@@ -128,35 +128,25 @@ impl State {
             }
         };
 
-        // Verify pane exists (check both ID and type)
-        if !self
-            .panes
-            .iter()
-            .any(|pane| pane.matches(msg.pane_id, msg.pane_type))
-        {
-            eprintln!(
-                "send_keys: Pane ID {} (type: {:?}) not found in cached panes",
-                msg.pane_id, msg.pane_type
-            );
-            return;
-        }
-
-        self.last_message = Some(format!(
-            "Sending to pane {} (type: {:?}, enter: {})",
-            msg.pane_id, msg.pane_type, msg.send_enter
-        ));
-
-        // Build PaneId based on pane type
-        let pane_id = match msg.pane_type {
-            PaneType::Plugin => PaneId::Plugin(msg.pane_id),
-            PaneType::Terminal => PaneId::Terminal(msg.pane_id),
+        // Resolve the message into a concrete plan (validates pane existence,
+        // selects the target pane). Pure logic lives in the library.
+        let plan = match resolve_send_keys(&msg, &self.panes) {
+            Ok(plan) => plan,
+            Err(e) => {
+                eprintln!("send_keys: {}", e);
+                return;
+            }
         };
 
+        self.last_message = Some(plan.summary);
+
+        let pane_id = target_to_pane_id(plan.target);
+
         // Send text
-        write_to_pane_id(msg.text.as_bytes().to_vec(), pane_id);
+        write_to_pane_id(plan.text_bytes, pane_id);
 
         // Delay Enter via timer to ensure text is processed first
-        if msg.send_enter {
+        if plan.schedule_enter {
             self.pending_enter.push_back(pane_id);
             set_timeout(ENTER_DELAY_SECS);
         }
@@ -169,5 +159,21 @@ impl State {
 
     fn handle_list_panes(&self) {
         println!("{}", serialize_panes(&self.panes));
+    }
+}
+
+/// Convert the library's host-testable `PaneTarget` into zellij's `PaneId`.
+fn target_to_pane_id(target: PaneTarget) -> PaneId {
+    match target {
+        PaneTarget::Terminal(id) => PaneId::Terminal(id),
+        PaneTarget::Plugin(id) => PaneId::Plugin(id),
+    }
+}
+
+/// Convert zellij's `PaneId` into the library's host-testable `PaneTarget`.
+fn pane_id_to_target(pane_id: PaneId) -> PaneTarget {
+    match pane_id {
+        PaneId::Terminal(id) => PaneTarget::Terminal(id),
+        PaneId::Plugin(id) => PaneTarget::Plugin(id),
     }
 }
