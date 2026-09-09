@@ -3,9 +3,13 @@ updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     cooldown:
       default-days: 7
+    groups:
+      routine-updates:
+        applies-to: version-updates
+        patterns: ["*"]
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
@@ -14,9 +18,13 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     cooldown:
       default-days: 7
+    groups:
+      routine-updates:
+        applies-to: version-updates
+        patterns: ["*"]
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
